@@ -1,0 +1,116 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Admin {
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Category {
+  id     String @id @default(cuid())
+  name   String @unique
+  slug   String @unique
+  gifts  Gift[]
+}
+
+model Gift {
+  id             String         @id @default(cuid())
+  name           String
+  description    String?        @db.Text
+  imageUrl       String?
+  price          Decimal        @db.Decimal(10, 2)
+  desiredQty     Int            @default(1)
+  giftedQty      Int            @default(0)
+  active         Boolean        @default(true)
+  categoryId     String?
+  category       Category?      @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  confirmations  Confirmation[]
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  @@index([categoryId])
+}
+
+enum ConfirmationStatus {
+  AGUARDANDO
+  CONFIRMADO
+  RECUSADO
+}
+
+model Confirmation {
+  id            String             @id @default(cuid())
+  giftId        String
+  gift          Gift               @relation(fields: [giftId], references: [id], onDelete: Cascade)
+  guestName     String
+  guestEmail    String
+  guestWhatsapp String?
+  message       String?            @db.Text
+  amount        Decimal            @db.Decimal(10, 2)
+  status        ConfirmationStatus @default(AGUARDANDO)
+  rejectReason  String?
+  receipt       Receipt?
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+
+  @@index([giftId])
+  @@index([status])
+}
+
+model Receipt {
+  id             String       @id @default(cuid())
+  confirmationId String       @unique
+  confirmation   Confirmation @relation(fields: [confirmationId], references: [id], onDelete: Cascade)
+  fileUrl        String
+  fileName       String
+  mimeType       String
+  createdAt      DateTime     @default(now())
+}
+
+model Settings {
+  id            String  @id @default("singleton")
+  coupleNames   String  @default("Maria Mercedez e Henrique")
+  groomName     String?
+  brideName     String?
+  coupleStory   String?
+  welcomeMsg    String  @default("Ficamos muito felizes em compartilhar este momento com você.")
+  guestMessage  String?
+  photoUrl      String?
+  bannerUrl     String?
+  logoUrl       String?
+  eventDate     DateTime?
+  eventTime     String?
+  venueName     String?
+  address       String?
+  mapsUrl       String?
+  notifyEmail   String?
+  // Aparência
+  themeName      String  @default("classico")
+  primaryColor   String  @default("#6E2A3A")
+  secondaryColor String  @default("#B8945F")
+  fontFamily     String  @default("Cormorant Garamond")
+  buttonStyle    String  @default("pill")
+  // Primeira configuração
+  setupCompleted Boolean @default(false)
+  // PIX
+  pixKey        String  @default("")
+  pixKeyType    String  @default("email") // cpf | cnpj | email | telefone | aleatoria
+  pixCity       String  @default("BRASILIA")
+  defaultAmount Decimal @default(0) @db.Decimal(10, 2)
+  // SMTP (opcional — sobrescreve as variáveis de ambiente quando preenchido)
+  smtpHost      String?
+  smtpPort      Int?
+  smtpUser      String?
+  smtpPass      String?
+  smtpFrom      String?
+  updatedAt     DateTime @updatedAt
+}

@@ -1,0 +1,35 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+  --color-primary: #6e2a3a;
+  --color-secondary: #b8945f;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: theme(colors.ivory);
+  color: theme(colors.ink);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+.hairline {
+  border-top: 1px solid rgba(184, 148, 95, 0.35);
+}
+
+@layer components {
+  .input {
+    @apply w-full rounded-lg border border-gold/30 bg-white px-4 py-3 text-sm outline-none focus:border-wine;
+  }
+}
