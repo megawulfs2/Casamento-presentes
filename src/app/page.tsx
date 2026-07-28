@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import Countdown from "@/components/Countdown";
+import SiteFooter from "@/components/SiteFooter";
 import { getSettings } from "@/lib/settings";
 import { isSetupComplete } from "@/lib/setup";
 
@@ -17,6 +18,7 @@ export default async function Home() {
   });
 
   return (
+    <>
     <main className="min-h-screen">
       {/* Hero */}
       <section className="relative overflow-hidden">
@@ -85,5 +87,7 @@ export default async function Home() {
         </div>
       </section>
     </main>
+    <SiteFooter area="public" />
+    </>
   );
 }

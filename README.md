@@ -262,3 +262,20 @@ reaberto por um administrador autenticado; visitantes são redirecionados para a
   novas fontes exige registrá-las em `next/font` (limitação de build).
 - As rotas do assistente (`/api/setup/*`) são liberadas apenas enquanto a configuração não
   foi concluída ou para um administrador autenticado (`assertSetupAccess`).
+
+---
+
+## Rodapé com transição site ↔ painel
+
+Há um rodapé (`src/components/SiteFooter.tsx`) presente no site (home e lista de
+presentes) e no painel, com um botão de transição:
+
+- No site, o botão "Área dos noivos" aponta **sempre para `/admin`**. Quem decide o
+  destino é o **middleware** (next-auth): visitantes sem sessão vão para `/admin/login`
+  (com `callbackUrl`) e administradores autenticados seguem direto ao painel. O rodapé
+  não conhece a regra de autenticação.
+- No painel, o botão leva de volta ao **site (visão do convidado)**, útil para pré-visualizar
+  o que os convidados veem.
+
+Assim o casal alterna entre as duas visões sem digitar URLs, e o painel permanece protegido
+por login (middleware + verificação de sessão no layout do painel).

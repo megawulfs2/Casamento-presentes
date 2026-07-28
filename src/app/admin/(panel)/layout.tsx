@@ -5,6 +5,7 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { isSetupComplete } from "@/lib/setup";
 import { ToastProvider } from "@/components/Toast";
+import SiteFooter from "@/components/SiteFooter";
 
 export const dynamic = "force-dynamic";
 
@@ -23,7 +24,7 @@ export default async function AdminLayout({
 
   return (
     <ToastProvider>
-      <div className="min-h-screen bg-ivory">
+      <div className="flex min-h-screen flex-col bg-ivory">
         <aside className="border-b border-gold/20 bg-white">
           <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-x-6 gap-y-2 px-6 py-4">
             <span className="font-display text-xl text-wine">Painel</span>
@@ -60,7 +61,10 @@ export default async function AdminLayout({
             </Link>
           </div>
         </aside>
-        <main className="mx-auto max-w-6xl px-6 py-10">{children}</main>
+        <main className="mx-auto w-full max-w-6xl flex-1 px-6 py-10">
+          {children}
+        </main>
+        <SiteFooter area="admin" />
       </div>
     </ToastProvider>
   );

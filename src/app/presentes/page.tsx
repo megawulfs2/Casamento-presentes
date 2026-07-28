@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { getSettings } from "@/lib/settings";
 import { isSetupComplete } from "@/lib/setup";
 import GiftGrid, { type GiftView } from "@/components/GiftGrid";
+import SiteFooter from "@/components/SiteFooter";
 
 export const dynamic = "force-dynamic";
 
@@ -31,6 +32,7 @@ export default async function PresentesPage() {
   }));
 
   return (
+    <>
     <main className="min-h-screen">
       <header className="border-b border-gold/20 bg-blush/30">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-6">
@@ -67,5 +69,7 @@ export default async function PresentesPage() {
         />
       </div>
     </main>
+    <SiteFooter area="public" />
+    </>
   );
 }

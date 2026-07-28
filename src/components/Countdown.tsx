@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 function diff(target: number) {
   const now = Date.now();
   const d = Math.max(0, target - now);
+
   return {
     dias: Math.floor(d / 86400000),
     horas: Math.floor((d % 86400000) / 3600000),
@@ -15,10 +16,21 @@ function diff(target: number) {
 
 export default function Countdown({ dateIso }: { dateIso: string }) {
   const target = new Date(dateIso).getTime();
-  const [t, setT] = useState(() => diff(target));
+
+  const [t, setT] = useState({
+    dias: 0,
+    horas: 0,
+    min: 0,
+    seg: 0,
+  });
 
   useEffect(() => {
-    const id = setInterval(() => setT(diff(target)), 1000);
+    setT(diff(target));
+
+    const id = setInterval(() => {
+      setT(diff(target));
+    }, 1000);
+
     return () => clearInterval(id);
   }, [target]);
 
