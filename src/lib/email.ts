@@ -3,6 +3,45 @@ import { getSettings } from "@/lib/settings";
 
 const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 
+/**
+ * Timeouts e resolução de conexão do transporter SMTP.
+ *
+ * `family: 4` força a conexão via IPv4: com outbound IPv6 habilitado (Railway),
+ * o Node às vezes escolhe a rota IPv6 até o smtp.gmail.com, que se mostrou
+ * instável a partir dessa infraestrutura e travava até o timeout padrão do
+ * Nodemailer (2 min), gerando ETIMEDOUT intermitente. Os timeouts abaixo
+ * também são reduzidos para falhar rápido em vez de travar a requisição.
+ */
+const SMTP_ROBUSTNESS = {
+  family: 4 as const,
+  connectionTimeout: 15_000,
+  greetingTimeout: 10_000,
+  socketTimeout: 15_000,
+};
+
+/** Loga o erro do SMTP com todos os campos relevantes (nodemailer/Node net). */
+function logSmtpError(context: string, err: unknown) {
+  const e = err as NodeJS.ErrnoException & {
+    command?: string;
+    response?: string;
+    responseCode?: number;
+    address?: string;
+    port?: number;
+  };
+  console.error(`[email] ${context}:`, {
+    message: e?.message,
+    code: e?.code,
+    errno: e?.errno,
+    syscall: e?.syscall,
+    address: e?.address,
+    port: e?.port,
+    command: e?.command,
+    response: e?.response,
+    responseCode: e?.responseCode,
+    stack: e?.stack,
+  });
+}
+
 interface SmtpConfig {
   host: string;
   port: number;
@@ -41,11 +80,12 @@ async function send(to: string, subject: string, html: string) {
       port: cfg.port,
       secure: cfg.port === 465,
       auth: { user: cfg.user, pass: cfg.pass },
+      ...SMTP_ROBUSTNESS,
     });
     await transporter.sendMail({ from: cfg.from, to, subject, html });
     return { ok: true as const };
   } catch (err) {
-    console.error("[email] falha ao enviar:", err);
+    logSmtpError("falha ao enviar", err);
     return { ok: false as const, error: "Falha no envio de e-mail" };
   }
 }
@@ -162,6 +202,7 @@ export async function sendTestEmail(
       port: cfg.port,
       secure: cfg.port === 465,
       auth: { user: cfg.user, pass: cfg.pass },
+      ...SMTP_ROBUSTNESS,
     });
     await transporter.sendMail({
       from: cfg.from || cfg.user,
@@ -175,7 +216,7 @@ export async function sendTestEmail(
     });
     return { ok: true };
   } catch (err) {
-    console.error("[email] teste falhou:", err);
+    logSmtpError("teste falhou", err);
     return { ok: false, error: "Falha ao enviar. Verifique host, porta e credenciais." };
   }
 }
