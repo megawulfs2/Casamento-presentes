@@ -279,3 +279,24 @@ presentes) e no painel, com um botão de transição:
 
 Assim o casal alterna entre as duas visões sem digitar URLs, e o painel permanece protegido
 por login (middleware + verificação de sessão no layout do painel).
+
+---
+
+## Uploads em produção (Railway)
+
+Os arquivos enviados (imagens de presentes, comprovantes e imagens do site) são
+gravados em uma pasta **fora de `public/`** — por padrão `<raiz do projeto>/uploads`,
+configurável pela variável `UPLOAD_DIR` — e servidos pela route handler
+`src/app/uploads/[...path]/route.ts`. As URLs continuam sendo `/uploads/...`.
+
+**Por que não ficam em `public/`:** o Next.js indexa a pasta `public/` uma única vez,
+na inicialização do servidor. Arquivos gravados em tempo de execução não entram nesse
+índice e retornam **404** em produção (localmente funciona porque o modo de
+desenvolvimento não usa esse cache).
+
+### Configuração obrigatória no Railway
+
+Adicione um **Volume** no serviço da aplicação montado em **`/app/uploads`**. Sem o
+volume, o sistema de arquivos do container é efêmero e todos os uploads são perdidos
+a cada novo deploy. Se você montar o volume em outro caminho, defina `UPLOAD_DIR`
+com esse mesmo caminho.

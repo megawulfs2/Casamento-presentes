@@ -15,7 +15,22 @@ const EXT: Record<string, string> = {
   "application/pdf": "pdf",
 };
 
-const UPLOAD_ROOT = path.join(process.cwd(), "public", "uploads");
+/**
+ * Diretório físico dos uploads.
+ *
+ * Fica FORA de `public/` porque o Next.js indexa `public/` apenas uma vez, na
+ * inicialização do servidor: arquivos criados depois disso não são servidos
+ * como estáticos (retornam 404 em produção). Os arquivos passam a ser servidos
+ * pela route handler `/uploads/[...path]`, mantendo as mesmas URLs.
+ *
+ * Em produção (Railway), aponte um volume persistente para este caminho
+ * (por padrão, `/app/uploads`) — ou defina UPLOAD_DIR.
+ */
+export const UPLOAD_ROOT =
+  process.env.UPLOAD_DIR ?? path.join(process.cwd(), "uploads");
+
+/** Local anterior dos arquivos — mantido apenas para ler uploads já existentes. */
+export const LEGACY_UPLOAD_ROOT = path.join(process.cwd(), "public", "uploads");
 
 export interface SavedFile {
   fileUrl: string;
@@ -30,7 +45,7 @@ export interface UploadResult {
 }
 
 /**
- * Valida e grava um arquivo enviado em public/uploads/<folder>.
+ * Valida e grava um arquivo enviado em <UPLOAD_ROOT>/<folder>.
  * Retorna erro amigável em vez de lançar exceção.
  */
 export async function saveUpload(
@@ -68,10 +83,13 @@ export async function saveUpload(
 /** Remove um arquivo salvo a partir da sua URL pública (/uploads/...). */
 export async function deleteUpload(fileUrl: string): Promise<void> {
   if (!fileUrl.startsWith("/uploads/")) return;
-  const abs = path.join(process.cwd(), "public", fileUrl);
-  try {
-    await unlink(abs);
-  } catch {
-    // arquivo já ausente — ignora
+  const relative = fileUrl.replace(/^\/uploads\//, "");
+  // Remove da raiz atual e também do local anterior (arquivos já existentes).
+  for (const root of [UPLOAD_ROOT, LEGACY_UPLOAD_ROOT]) {
+    try {
+      await unlink(path.join(root, relative));
+    } catch {
+      // arquivo já ausente — ignora
+    }
   }
 }

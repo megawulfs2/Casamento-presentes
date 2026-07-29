@@ -5,6 +5,7 @@ import nodemailer from "nodemailer";
 import { assertSetupAccess } from "@/lib/setup";
 import { prisma } from "@/lib/prisma";
 import { generatePix, type PixKeyType } from "@/lib/pix";
+import { UPLOAD_ROOT } from "@/lib/upload";
 
 interface Check {
   key: string;
@@ -16,7 +17,7 @@ interface Check {
 
 async function canWrite(folder: string): Promise<boolean> {
   try {
-    const dir = path.join(process.cwd(), "public", "uploads", folder);
+    const dir = path.join(UPLOAD_ROOT, folder);
     await mkdir(dir, { recursive: true });
     const probe = path.join(dir, `.probe-${Date.now()}`);
     await writeFile(probe, "ok");
@@ -59,7 +60,7 @@ export async function POST(req: NextRequest) {
 
   // Permissões de escrita + uploads
   const writeOk = await canWrite("");
-  checks.push({ key: "write", label: "Permissões de escrita", ok: writeOk, detail: writeOk ? "Escrita liberada em public/uploads." : "Sem permissão de escrita em public/uploads." });
+  checks.push({ key: "write", label: "Permissões de escrita", ok: writeOk, detail: writeOk ? "Escrita liberada na pasta de uploads." : "Sem permissão de escrita na pasta de uploads." });
   const imgOk = await canWrite("gifts");
   checks.push({ key: "upload_img", label: "Upload de imagens", ok: imgOk, detail: imgOk ? "Pasta de imagens pronta." : "Falha ao gravar imagens." });
   const rcpOk = await canWrite("receipts");
