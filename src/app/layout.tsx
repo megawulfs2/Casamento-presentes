@@ -25,6 +25,12 @@ export const metadata: Metadata = {
   },
 };
 
+// O app é inteiramente dinâmico (todas as páginas leem dados do banco em tempo
+// de execução). Forçar renderização dinâmica no layout raiz impede o Next.js de
+// pré-renderizar qualquer página durante o build — inclusive /_not-found e
+// /admin/login — evitando acesso ao banco no momento do build no Railway.
+export const dynamic = "force-dynamic";
+
 export default async function RootLayout({
   children,
 }: {
