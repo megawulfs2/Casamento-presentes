@@ -46,7 +46,7 @@ export default async function Home() {
             <Countdown dateIso={eventDate.toISOString()} />
           </div>
 
-          <div className="mt-12 flex flex-col items-center justify-center gap-3 sm:flex-row">
+          <div className="mt-12 flex items-center justify-center">
             <Link
               href="/presentes"
               style={{ background: "var(--color-primary)" }}
@@ -54,12 +54,6 @@ export default async function Home() {
             >
               Lista de presentes
             </Link>
-            <a
-              href={s.mapsUrl ?? "#local"}
-              className="rounded-full border border-gold/60 px-9 py-4 text-base text-wine transition hover:bg-blush/50"
-            >
-              Confirmar presença
-            </a>
           </div>
         </div>
       </section>
