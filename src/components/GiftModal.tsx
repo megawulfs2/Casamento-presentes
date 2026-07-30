@@ -155,7 +155,7 @@ export default function GiftModal({ gift, pixConfigured, onClose }: Props) {
                   />
                   <Input
                     name="guestWhatsapp"
-                    placeholder="WhatsApp (opcional)"
+                    placeholder="WhatsApp"
                   />
                   <textarea
                     name="message"
